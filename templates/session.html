@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+
+<head>
+    <title>EmoChat - Single Channel Chat App</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<link rel="icon" href="/static/favicon.ico" sizes="32x32">
+	
+</head>
+
+<body>
+	
+	<nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href=".">
+            <img src="/static/emoji.svg" width="30" height="30" class="d-inline-block align-top" alt=""> EmoChat
+        </a>
+    </nav>
+    
+
+    <div class="chatArea">
+        <ul class="list-group" id='chatBox'>
+            <li class="list-group-item"> Greetings from EmoChat! Enter your preferred username</li>
+        </ul>
+    </div>
+    <form style="position: fixed; bottom: 0; width:100%">
+        <div class="form-group">
+            <div class="container">
+                <div class="row">
+
+                    <div class="input-group">
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span style="width: 200px; text-align: center;" class="input-group-text" id="userInput">Username</span>
+                            </div>
+                            <input type="text" class="form-control" id="unitest" placeholder="Type here..." aria-label="Username" aria-describedby="userInput">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!--     jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+        var socket = io.connect('https://' + document.domain);
+        var user = false;
+
+        socket.on('connect', function() {
+
+            var form = $('form').on('submit', function(e) {
+                e.preventDefault()
+                if (!(user)) {
+                    let user_name = $("#unitest").val();
+                    $("#userInput").text(user_name);
+                    $("#chatBox").append('<li class="list-group-item"> EmoChat welcomes you, ' + user_name + '</li>');
+                    user = true;
+                    socket.emit('my event', {
+                        data: user_name + ' has joined the chat'
+                    });
+                    $('#unitest').attr("placeholder", "Type here...");
+                    $('#unitest').val('').focus();
+
+                } 
+				else {
+                    let user_name = $("#userInput").text();
+                    let user_input = $('#unitest').val();
+                    socket.emit('my event', {
+                        user_name: user_name,
+                        message: user_input
+                    });
+                    $('#unitest').val('').focus();
+                }
+
+            });
+        });
+
+        socket.on('my response', function(msg) {
+            if (typeof msg.user_name !== 'undefined') {
+
+                $("#chatBox").append('<li class="list-group-item d-flex justify-content-between align-items-center">' + msg.user_name + '</b>: ' + msg.message + '<span class="badge badge-primary badge-pill">' + msg.emotion + '</span> </li>');
+            } else {
+                let user_name = $("#userInput").text();
+                var received = msg.data;
+                if (!(received.includes(user_name)) && (user_name !== 'Username')) {
+                    $("#chatBox").append('<li class="list-group-item d-flex justify-content-between align-items-center">' + received + '</li>');
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
