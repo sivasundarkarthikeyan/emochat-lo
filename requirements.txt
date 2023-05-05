@@ -1,5 +1,5 @@
 Flask>=2.2.5
-Flask-SocketIO==4.2.1
+Flask-SocketIO>=5.3.4
 ibm-watson==4.3.0
 ibm-cloud-sdk-core==1.5.1
 gunicorn=19.5.0
